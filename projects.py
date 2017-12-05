@@ -13,15 +13,16 @@ def mkdir_p(directory_name):
 class Project:
     base_dir = os.path.join(os.environ["HOME"], ".dog")
 
-    def __init__(self, name):
+    def __init__(self, name, logger):
         self.name = name
         self.path = os.path.join(Project.base_dir, name)
-        print self.path
+        self.logger = logger
         mkdir_p(self.path)
 
     def save_file(self, name, content):
         with open(os.path.join(self.path, name), "w") as f:
             f.write(content)
+        self.logger.info("Saved file %s for project: %s" % (name, self.name))
 
     def save_data(self, data):
         db = sqlite3.connect(os.path.join(self.path, "project.db"))
@@ -33,10 +34,10 @@ class Project:
                 c.execute("CREATE TABLE %s (%s)" % (data[0], data[0]))
 
             c.execute("INSERT INTO %s values ('%s')" % (data[0], data[1]))
-            print "[+] Data to save....%s" % data
+            self.logger.info("%s %s saved for project %s" % (data[0], data[1], self.name) )
         except Exception as ex:
             print ex
-            print "[!] Could not save data to db"
+            self.logger.error("Could not save data to db")
         finally:
             c.close()
             db.commit()

@@ -26,6 +26,11 @@ class DogShell(cmd.Cmd):
         self.server.send(json.dumps(request))
         print self.server.recv()
     
+    def do_lsapp(self, line):
+        request = {"type": "lsapp", "project": self.project}
+        self.server.send(json.dumps(request))
+        print self.server.recv()
+    
     def do_quit(self, line):
         return True
 
