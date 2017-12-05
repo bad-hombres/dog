@@ -22,9 +22,12 @@ class Client:
         
         for f in self.filters:
             self.publisher.setsockopt(zmq.SUBSCRIBE, f)
+
+        self.publisher.setsockopt(zmq.SUBSCRIBE, "SHUTDOWN")
         
-        print "[+] Registering node %s to listen for %s messages...." % (self.name, self.filter)
-        self.control.send(b"CONNECT:%s:%s" % (self.name, ", ".join(self.filters)))
+        print "[+] Registering node %s to listen for %s messages...." % (self.name, self.filters)
+        connect = {"type": "connect", "app": self.name, "filters": self.filters}
+        self.control.send(json.dumps(connect))
 
         data = self.__recv__()
         if data == "!!ERROR!!":
@@ -47,10 +50,15 @@ class Client:
     def run(self):
         while True:
             result = {}
-            [address, content] = self.publisher.recv_multipart()
+            [address, content, project] = self.publisher.recv_multipart()
+            if address == "SHUTDOWN":
+                print "[!] Shutdown recieved..."
+                break
+
             print "[+] Recieved %s..." % content
             result["type"] = "result"
             result["data"] = self.callback(content)
+            result["project"] = project
             self.control.send(json.dumps(result))
             resp = self.control.recv()
             if resp == "!!ERROR!!":
