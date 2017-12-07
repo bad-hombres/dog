@@ -1,7 +1,7 @@
 import dogclient
 import socket
 
-def handle_data(data):
+def handle_data(msg_typ, data, emitter):
     print data
     return [
             {"type": "event", "event": [b"HOST", b"10.11.1.1"]},

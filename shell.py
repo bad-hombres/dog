@@ -13,6 +13,7 @@ class DogShell(cmd.Cmd):
         self.context = zmq.Context()
         self.server = self.context.socket(zmq.REQ)
         self.server.connect("tcp://%s" % self.host)
+        self.risk_level = "1"
 
     def do_chprj(self, line):
         self.project = line
@@ -20,7 +21,7 @@ class DogShell(cmd.Cmd):
 
     def do_add(self, line):
         data = line.split(" ")
-        request = {"type": "result", "project": self.project,  "data": [
+        request = {"type": "result", "project": self.project, "risk_level": self.risk_level, "data": [
             {"type": "event", "event": data}
         ]}
         self.server.send(json.dumps(request))
@@ -30,7 +31,10 @@ class DogShell(cmd.Cmd):
         request = {"type": "lsapp", "project": self.project}
         self.server.send(json.dumps(request))
         print self.server.recv()
-    
+   
+    def do_set_risk_level(self, line):
+        self.risk_level = str(int(line))
+        print "Current Risk Level: %s" % self.risk_level
     def do_quit(self, line):
         return True
 

@@ -18,9 +18,13 @@ class CommandHandler:
                 if d["type"] == "event":
                     event = map(lambda x: x.encode('ascii'), d["event"])
                     event.append(project.name.encode('ascii'))
-                    events.append(event)
-                    self.logger.info("Data %s recieved for project %s" % (event, project.name))
-                    project.save_data(d["event"])
+                    event.append(str(command["risk_level"]))
+                    if event[0] == "LOG":
+                        self.logger.info(event[1])
+                    else:
+                        events.append(event)
+                        self.logger.info("Data %s recieved for project %s" % (event, project.name))
+                        project.save_data(d["event"])
 
                 if d["type"] == "file":
                     self.logger.info("File: %s recieved for project %s" % (d["name"], project.name))
@@ -39,7 +43,7 @@ class CommandHandler:
         self.logger.info("App: %s connected and is listening for %s" % (command["app"], command["filters"]))
 
         self.registry[command["app"]] = command["filters"]
-        return "OK", [[b"DOMAIN", "www.google.com", "default"]]
+        return "OK", []
 
     def handle(self, command):
         return self.handlers[command["type"]](command)

@@ -33,7 +33,11 @@ class Project:
             if c.fetchone() is None:
                 c.execute("CREATE TABLE %s (%s)" % (data[0], data[0]))
 
-            c.execute("INSERT INTO %s values ('%s')" % (data[0], data[1]))
+            sql = """
+                INSERT INTO %s
+                SELECT '%s' WHERE NOT EXISTS (SELECT 1 FROM %s WHERE %s = '%s')
+            """ % (data[0], data[1], data[0], data[0], data[1])
+            c.execute(sql)
             self.logger.info("%s %s saved for project %s" % (data[0], data[1], self.name) )
         except Exception as ex:
             print ex

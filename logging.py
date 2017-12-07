@@ -8,7 +8,7 @@ class Logger:
         d = datetime.datetime.now()
         line = "[%s] %s - %s: %s" % (symbol, d, level, message)
         print line
-        self.publisher.send_multipart([b"LOG", line.encode('ascii')])
+        self.publisher.send_multipart([b"LOG", line.encode('ascii'), "", "1"])
 
     def error(self, message):
         self.__log__("*", "ERROR", message)
