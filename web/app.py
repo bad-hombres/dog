@@ -3,6 +3,7 @@ import json
 import zmq
 import os
 import sqlite3
+import dogclient
 
 cl = []
 
@@ -77,7 +78,17 @@ class ApiHandler(web.RequestHandler):
 
     @web.asynchronous
     def post(self):
-        pass
+        print self.request.body
+        data = json.loads(self.request.body)
+        event_type = data["event_type"]
+        value = data["value"]
+        project = data["project"]
+        risk_level = data["risk_level"]
+        emitter = dogclient.Emitter(control, project, risk_level)
+        emitter.emit_event(event_type, value)
+        self.write({"result": "OK"})
+        self.finish()
+
 
 app = web.Application([
     (r'/', IndexHandler),
@@ -91,6 +102,12 @@ context = zmq.Context()
 subscriber = context.socket(zmq.SUB)
 subscriber.connect("tcp://localhost:5556")
 subscriber.setsockopt(zmq.SUBSCRIBE, b'LOG')
+
+control = context.socket(zmq.REQ)
+control.connect("tcp://localhost:5555")
+connect = {"type": "connect", "app": "Web Console", "filters": []}
+control.send(json.dumps(connect))
+control.recv()
 
 poller = zmq.Poller()
 poller.register(subscriber, zmq.POLLIN)

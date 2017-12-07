@@ -5,7 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
 </head>
-<body>
+<body style="padding-top: 3.5rem;">
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+      <a class="navbar-brand" href="#">Derpidy Dawg</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#derpNav" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="derpNav">
+        <form class="form-inline my-2 my-lg-0">
+          <input class="form-control mr-sm-2" type="text" placeholder="EventType" id="event_type">
+          <input class="form-control mr-sm-2" type="text" placeholder="Value" id="value">
+          <input class="form-control mr-sm-2" type="text" placeholder="Risk Level" id="risk_level">
+          <button id="submit_event" class="btn btn-outline-success my-2 my-sm-0" type="submit">Submit</button>
+        </form>
+      </div>
+    </nav>
+
   <div class="container"> 
 
     <h1>Dog Console</h1>
@@ -109,6 +125,32 @@
         });
       });
     }
+
+    $('#submit_event').click(function(event) {
+      event.preventDefault();
+      var event_type = $('#event_type').val();
+      var value = $('#value').val();
+      var risk_level = $('#risk_level').val();
+      var project = $('.dog-project.active').data("project");
+
+      if (project == undefined || project == "") {
+        alert("Please select a project first");
+      } else {
+        $.ajax({
+          type: "POST",
+          url: '/api',
+          data: JSON.stringify({"event_type": event_type, "value": value, "risk_level": risk_level, "project": project}),
+          success: function(data, status, xhr) {
+            console.log(data);
+            $('#event_type').val('');
+            $('#value').val('');
+            $('#risk_level').val('');
+          },
+          dataType: 'json',
+          contentType: 'application/json'
+        });
+      }
+    });
   </script>
 </body>
 </html>
