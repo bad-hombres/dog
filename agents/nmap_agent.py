@@ -33,7 +33,7 @@ def handle_data(msg_type, data, emitter):
 
     return events
 
-c = dogclient.Client("Nmap Service", sys.argv[1], ["HOST", "IPRANGE"], handle_data, risk_level=3)
+c = dogclient.Client("Nmap Service", sys.argv[1], ["HOST", "IPRANGE"], handle_data, risk_level=1)
 try:
     c.connect()
     c.run()

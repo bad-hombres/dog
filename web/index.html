@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>tornado WebSocket example</title>
+  <title>Derpidy Dawg!</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
 </head>
@@ -13,6 +13,16 @@
       </button>
 
       <div class="collapse navbar-collapse" id="derpNav">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+          </li>
+          <li class="nav-item">
+          </li>
+          <li class="nav-item dropdown">
+          </li>
+          <li class="nav-item">
+          </li>
+        </ul>
         <form class="form-inline my-2 my-lg-0">
           <input class="form-control mr-sm-2" type="text" placeholder="EventType" id="event_type">
           <input class="form-control mr-sm-2" type="text" placeholder="Value" id="value">
@@ -75,7 +85,7 @@
       $message.fadeIn("slow");
       $message.text('recieved message');
       var log = $('#logs');
-      log.append(ev.data + "\n");
+      log.text(log.text() + ev.data + "\n");
       log.scrollTop(log.prop("scrollHeight"));
     };
     ws.onclose = function(ev){

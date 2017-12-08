@@ -78,7 +78,6 @@ class ApiHandler(web.RequestHandler):
 
     @web.asynchronous
     def post(self):
-        print self.request.body
         data = json.loads(self.request.body)
         event_type = data["event_type"]
         value = data["value"]

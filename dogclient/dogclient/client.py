@@ -50,7 +50,7 @@ class Client:
         self.publisher.setsockopt(zmq.SUBSCRIBE, "SHUTDOWN")
         
         print "[+] Registering node %s to listen for %s messages...." % (self.name, self.filters)
-        connect = {"type": "connect", "app": self.name, "filters": self.filters}
+        connect = {"type": "connect", "app": self.name + "@" + socket.gethostname(), "filters": self.filters}
         self.control.send(json.dumps(connect))
 
         data = self.__recv__()
