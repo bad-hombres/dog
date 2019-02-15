@@ -3,6 +3,7 @@ import time
 import json
 import commands
 import logging
+import sys
 
 context = zmq.Context()
 control = context.socket(zmq.REP)
@@ -24,3 +25,7 @@ while True:
         control.send_string(response)
         for event in events:
             publisher.send_multipart(event)
+            if event[0] == "SHUTDOWN":
+                sys.exit(0)
+        
+

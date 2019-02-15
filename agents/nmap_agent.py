@@ -23,13 +23,13 @@ def handle_data(msg_type, data, emitter):
                     version = nm[data]["tcp"][k]['version']
                     cpe = nm[data]["tcp"][k]['cpe']
 
-                    events.append({"type": "event", "event": ["SERVICE", "%s:%s" % (data, k)] })
+                    events.append({"type": "event", "event": ["SERVICE", "host=%s port=%s" % (data, k)] })
                     if not product == "":
-                        events.append({"type": "event", "event": ["SOFTWARE", "%s:%s~%s~%s~%s" % (data, k,product, version, cpe)] })
+                        events.append({"type": "event", "event": ["SOFTWARE", "host=%s port=%s product=%s version=%s cpe=%s" % (data, k,product, version, cpe)] })
 
             events.append({"type": "file", "name": "%s_nmap.csv" % data, "content": nm.csv() })
     except Exception as ex:
-        events.append({"type": "event", "event": ["LOG", "Error during nmap scan: %s" % ex] })
+        events.append({"type": "event", "event": ["LOG", "message=Error during nmap scan: %s" % ex] })
 
     return events
 

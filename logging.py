@@ -1,3 +1,4 @@
+ # -*- coding: utf8 -*
 import datetime
 
 class Logger:
@@ -6,9 +7,9 @@ class Logger:
 
     def __log__(self, symbol, level, message):
         d = datetime.datetime.now()
-        line = "[%s] %s - %s: %s" % (symbol, d, level, message)
+        line = u"timestamp=%s¬type=logs¬level=%s¬message=%s" % (d, level, message.replace(u"=", u"%3d"))
         print line
-        self.publisher.send_multipart([b"LOG", line.encode('ascii'), "", "1"])
+        #self.publisher.send_multipart([b"LOG", line.encode('ascii'), "", "1"])
 
     def error(self, message):
         self.__log__("*", "ERROR", message)

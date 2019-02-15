@@ -48,6 +48,7 @@ class Client:
             self.publisher.setsockopt(zmq.SUBSCRIBE, f)
 
         self.publisher.setsockopt(zmq.SUBSCRIBE, "SHUTDOWN")
+        self.publisher.setsockopt(zmq.SUBSCRIBE, "PING")
         
         print "[+] Registering node %s to listen for %s messages...." % (self.name, self.filters)
         connect = {"type": "connect", "app": self.name + "@" + socket.gethostname(), "filters": self.filters}
@@ -76,12 +77,18 @@ class Client:
             result = {}
             [address, content, project, risk_level] = self.publisher.recv_multipart()
             risk_level = int(risk_level)
+                
             if address == "SHUTDOWN":
                 print "[!] Shutdown recieved..."
                 break
 
             emitter = Emitter(self.control, project, risk_level)
             
+            if address == "PING":
+                print "[+] Recived PING message..."
+                emitter.emit_event("LOG", self.name + "@" + socket.gethostname() + ", filters:" + str(self.filters))
+                continue
+
             print "[+] Recieved %s..." % content
             if self.risk_level <= risk_level:
                 resp = emitter.emit_result(self.callback(address, content, emitter))
@@ -91,7 +98,7 @@ class Client:
                 else:
                     print "[+] %s" % resp
             else:
-                message = "Nmap Agent: Message recieved with risk_level: %s current risk_level: %s....message has been rejected" % (risk_level, self.risk_level)
+                message = "Message recieved with risk_level: %s current risk_level: %s....message has been rejected" % (risk_level, self.risk_level)
                 print "[!] " + message
                 emitter.emit_event("LOG", message)
             

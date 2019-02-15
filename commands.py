@@ -7,7 +7,8 @@ class CommandHandler:
         self.handlers = {
             "connect": self.handle_connect,
             "result": self.handle_result,
-            "lsapp": self.handle_lsapp
+            "lsapp": self.handle_lsapp,
+            "lsprj": self.handle_lsprj
         }
 
     def handle_result(self, command):
@@ -18,10 +19,13 @@ class CommandHandler:
                 if d["type"] == "event":
                     event = map(lambda x: x.encode('ascii'), d["event"])
                     event.append(project.name.encode('ascii'))
-                    event.append(str(command["risk_level"]))
                     if event[0] == "LOG":
                         self.logger.info(event[1])
+                    elif event[0] == "PING" or event[0] == "SHUTDOWN":
+                        events.append(event)
+                        event.append("9999")
                     else:
+                        event.append(str(command["risk_level"]))
                         events.append(event)
                         self.logger.info("Data %s recieved for project %s" % (event, project.name))
                         project.save_data(d["event"])
@@ -44,6 +48,9 @@ class CommandHandler:
 
         self.registry[command["app"]] = command["filters"]
         return "OK", []
+
+    def handle_lsprj(self, command):
+        return ",".join(projects.Project.list()), []
 
     def handle(self, command):
         return self.handlers[command["type"]](command)

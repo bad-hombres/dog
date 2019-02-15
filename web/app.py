@@ -4,6 +4,9 @@ import zmq
 import os
 import sqlite3
 import dogclient
+import os
+import sys
+
 
 cl = []
 
@@ -101,10 +104,11 @@ context = zmq.Context()
 subscriber = context.socket(zmq.SUB)
 subscriber.connect("tcp://localhost:5556")
 subscriber.setsockopt(zmq.SUBSCRIBE, b'LOG')
+subscriber.setsockopt(zmq.SUBSCRIBE, b'SHUTDOWN')
 
 control = context.socket(zmq.REQ)
 control.connect("tcp://localhost:5555")
-connect = {"type": "connect", "app": "Web Console", "filters": []}
+connect = {"type": "connect", "app": "Web Console", "filters": ["LOG"]}
 control.send(json.dumps(connect))
 control.recv()
 
@@ -117,6 +121,9 @@ def get_message():
         socks = dict(poller.poll(10))
         if subscriber in socks and socks[subscriber] == zmq.POLLIN:
             content = subscriber.recv_multipart()
+            if content[0] == "SHUTDOWN":
+                sys.exit(0)
+
             for c in cl:                
                 c.write_message(str(content[1]))
     finally:
