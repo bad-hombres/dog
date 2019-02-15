@@ -3,6 +3,7 @@ import socket
 import sys
 import nmap
 
+# Configured to work with new ELK
 def handle_data(msg_type, data, emitter):
     emitter.emit_event("LOG", "Staring NMAP scan for %s" % data)
     nm = nmap.PortScanner()
