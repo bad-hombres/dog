@@ -2,6 +2,7 @@ import zmq
 import sys
 import socket
 import json
+from .events import LogEvent, DogEvent
 
 class Emitter:
     def __init__(self, socket, project, risk_level):
@@ -9,9 +10,9 @@ class Emitter:
         self.project = project
         self.risk_level = risk_level
 
-    def emit_event(self, event_type, data):
+    def emit_event(self, event_object):
         event = [
-            {"type": "event", "event":  [event_type.encode('ascii'), data.encode('ascii')]}
+           event_object
         ]
 
         return self.emit_result(event)
@@ -19,7 +20,7 @@ class Emitter:
     def emit_result(self, data):
         result = {}
         result["type"] = "result"
-        result["data"] = data
+        result["data"] = [x.get_event() for x in data]
         result["project"] = self.project
         result["risk_level"] = self.risk_level
 
@@ -86,12 +87,13 @@ class Client:
             
             if address == "PING":
                 print "[+] Recived PING message..."
-                emitter.emit_event("LOG", self.name + "@" + socket.gethostname() + ", filters:" + str(self.filters))
+                emitter.emit_event(LogEvent(self.name + "@" + socket.gethostname() + ", filters:" + str(self.filters)))
                 continue
 
             print "[+] Recieved %s..." % content
             if self.risk_level <= risk_level:
-                resp = emitter.emit_result(self.callback(address, content, emitter))
+                event = DogEvent.from_serialized(address, content)
+                resp = emitter.emit_result(self.callback(event, emitter))
 
                 if resp == "!!ERROR!!":
                     print "[!] Server has not acknowleged data sent..results may not have been processed "
@@ -100,5 +102,5 @@ class Client:
             else:
                 message = "Message recieved with risk_level: %s current risk_level: %s....message has been rejected" % (risk_level, self.risk_level)
                 print "[!] " + message
-                emitter.emit_event("LOG", message)
+                emitter.emit_event(LogEvent(message))
             

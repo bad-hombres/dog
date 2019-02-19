@@ -13,12 +13,12 @@ class CommandHandler:
 
     def handle_result(self, command):
         if not command["data"] is None:
-            project = projects.Project(command["project"], self.logger)
+            project = projects.Project(command["project"].encode("ascii"), self.logger)
             events = []
             for d in command["data"]:
                 if d["type"] == "event":
-                    event = map(lambda x: x.encode('ascii'), d["event"])
-                    event.append(project.name.encode('ascii'))
+                    event = map(lambda x: x.encode("ascii"), d["event"])
+                    event.append(project.name)
                     if event[0] == "LOG":
                         self.logger.info(event[1])
                     elif event[0] == "PING" or event[0] == "SHUTDOWN":
@@ -27,7 +27,7 @@ class CommandHandler:
                     else:
                         event.append(str(command["risk_level"]))
                         events.append(event)
-                        self.logger.info("Data %s recieved for project %s" % (event, project.name))
+                        self.logger.info("%s recieved for project %s" % (event[0], project.name))
                         project.save_data(d["event"])
 
                 if d["type"] == "file":

@@ -2,39 +2,44 @@ import dogclient
 import socket
 import sys
 import json
-from ares import CVESearch
+import requests
 
-def handle_data(msg_type, data, emitter):
-    emitter.emit_event("LOG", "Staring CVE Search for %s" % data)
-    api = CVESearch()
+def cvefor(cpe):
+    r = requests.get("https://cve.circl.lu/api/cvefor/{}".format(cpe))
+    return r.json()
+
+def handle_data(event, emitter):
     events = []
-
     try:
-        service, name, version, cpe = data.split("~")
+        host = event.data["host"]
+        port = event.data["port"]
+        product = event.data["product"]
+        version = event.data["version"]
+        cpe = event.data["cpe"]
 
+        emitter.emit_event(dogclient.LogEvent("Staring CVE Search for %s" % cpe))
         if len(cpe.strip()) > 0:
-            contents = api.cvefor(cpe)
-            results = json.loads(contents)
+            results = cvefor(cpe)
             events = []
 
             for result in results:
-                refs = map(lambda x: "<a target='_blank' href='%s'>%s</a>" % (x, x), result['references'])
-                if "references" in result.keys():
-                    event_info = """<p>
-                        <h4>%s - %s - %s (%s)</h4>
+                cve = result["id"]
+                summary = result["summary"]
+                refs = ""
 
-                        <p>%s</p>
-                        <p>%s</p>
-                    </p>""" % (name, version, result["id"], service, result["summary"], "<br/>".join(refs))
-                    events.append({"type": "event", "event": ["CVE", event_info]})
+                if "references" in result.keys():
+                    summary += "\n" + "\n".join(result["references"])
+
+                events.append(dogclient.CveEvent(host, port, product, version, cve, summary))
 
                 if "exploit-db" in result.keys():
-                    exploits = map(lambda x: "<a target='_blank' href='https://www.exploit-db.com/exploits/%s/'>%s</a>" % (x['id'], x['description']), result['exploit-db'])
+                    exploits = map(lambda x: "https://www.exploit-db.com/exploits/%s/" % x['id'].replace("EDB-ID:", ""), result['exploit-db'])
                     for e in exploits:
-                        events.append({"type": "event", "event": ["EXPLOIT", e ]})
+                        events.append(dogclient.ExploitEvent(host, port, product, version, cve, e))
 
     except Exception as ex:
-        events.append({"type": "event", "event": ["LOG", "Error during CVE search: %s" % ex] })
+        print ex
+        events.append(dogclient.LogEvent("Error during CVE search: %s" % ex))
 
     return events
 

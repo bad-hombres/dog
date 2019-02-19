@@ -4,18 +4,19 @@ import sys
 import nmap
 
 # Configured to work with new ELK
-def handle_data(msg_type, data, emitter):
-    emitter.emit_event("LOG", "Staring NMAP scan for %s" % data)
+def handle_data(event, emitter):
+    emitter.emit_event(dogclient.LogEvent("Staring NMAP scan for %s" % event.data["value"]))
     nm = nmap.PortScanner()
     events = []
+    data = event.data["value"]
 
     try:
-        if msg_type == "IPRANGE":
+        if event.event_type == "IPRANGE":
             nm.scan(hosts=data, arguments='-n -sP')
             hosts_list = [x for x in nm.all_hosts() if nm[x]['status']['state'] == "up"]
-            events = map(lambda x: {"type": "event", "event": ["HOST", x ]}, hosts_list)
+            events = map(lambda x: dogclient.HostEvent(x), hosts_list)
 
-        if msg_type == "HOST":
+        if event.event_type == "HOST":
             nm.scan(data, arguments="-sV --top-ports 100")
 
             if 'tcp' in nm[data].keys():
@@ -24,13 +25,13 @@ def handle_data(msg_type, data, emitter):
                     version = nm[data]["tcp"][k]['version']
                     cpe = nm[data]["tcp"][k]['cpe']
 
-                    events.append({"type": "event", "event": ["SERVICE", "host=%s port=%s" % (data, k)] })
+                    events.append(dogclient.ServiceEvent(data, k))
                     if not product == "":
-                        events.append({"type": "event", "event": ["SOFTWARE", "host=%s port=%s product=%s version=%s cpe=%s" % (data, k,product, version, cpe)] })
+                        events.append(dogclient.SoftwareEvent(data, k, product, version, cpe))
 
-            events.append({"type": "file", "name": "%s_nmap.csv" % data, "content": nm.csv() })
+            events.append(dogclient.FileEvent("%s_nmap.csv" % data, nm.csv()))
     except Exception as ex:
-        events.append({"type": "event", "event": ["LOG", "message=Error during nmap scan: %s" % ex] })
+        events.append(dogclient.LogEvent("Error during nmap scan: %s" % ex))
 
     return events
 

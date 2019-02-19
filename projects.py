@@ -30,35 +30,9 @@ class Project:
             f.write(content)
         self.logger.info("Saved file %s for project: %s" % (name, self.name))
 
-#    def save_data(self, data):
-#        db = sqlite3.connect(os.path.join(self.path, "project.db"))
-#        c = db.cursor()
-#
-#        try:
-#            c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name = '%s';" % data[0])
-#            self.logger.info("Checked Need create table")
-#            if c.fetchone() is None:
-#                self.logger.info("Need create table")
-#                c.execute("CREATE TABLE %s (%s)" % (data[0], data[0]))
-#
-#            sql = """
-#                INSERT INTO %s 
-#                SELECT ? WHERE NOT EXISTS (SELECT 1 FROM %s WHERE %s = ?)
-#            """ % (data[0], data[0], data[0])
-#            c.execute(sql, (data[1], data[1]))
-#            self.logger.info("%s %s saved for project %s" % (data[0], data[1], self.name) )
-#        except Exception as ex:
-#            self.logger.error("Could not save data to db: %s" % ex)
-#        finally:
-#            c.close()
-#            db.commit()
-#            db.close()
-
     def save_data(self, data):
         d = datetime.datetime.now()
-        if "=" not in data[1]:
-            data[1] = "value=" + data[1]
         try:
-            print u"timestamp={}¬type={}¬project={}¬{}".format(d, data[0], self.name, data[1])
+            print "timestamp={}~type={}~project={}~{}".format(d, data[0], self.name, data[1])
         except Exception as ex:
             self.logger.error("Could not save data to db: %s" % ex)

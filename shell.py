@@ -31,7 +31,7 @@ class DogShell(cmd.Cmd):
         self.__update_prompt()
 
     def do_add(self, line):
-        data = line.replace("value=", "").split(" ")
+        data = line.split(" ")
         request = {"type": "result", "project": self.project, "risk_level": self.risk_level, "data": [
             {"type": "event", "event": data}
         ]}
