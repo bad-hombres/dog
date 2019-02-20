@@ -17,6 +17,6 @@ services:
     environment:
       - DOG_SERVER=${DOG_SERVER}
   cve-agent:
-    image: "hombres/dog-cve-search"
+    image: "hombres/dog-cvesearch-agent"
     environment:
       - DOG_SERVER=${DOG_SERVER}
