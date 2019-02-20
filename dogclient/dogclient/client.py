@@ -43,7 +43,9 @@ class Client:
 
     def connect(self):
         self.control.connect(self.control_url)
+        self.control.setsockopt(zmq.LINGER, 0)
         self.publisher.connect(self.publish_url)
+        self.publisher.setsockopt(zmq.LINGER, 0)
         
         for f in self.filters:
             self.publisher.setsockopt(zmq.SUBSCRIBE, f)
