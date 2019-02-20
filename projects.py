@@ -33,6 +33,8 @@ class Project:
     def save_data(self, data):
         d = datetime.datetime.now()
         try:
-            print "timestamp={}~type={}~project={}~{}".format(d, data[0], self.name, data[1])
+            sys.stdout.write("timestamp={}~type={}~project={}~{}\n".format(d, data[0], self.name, data[1]))
+            sys.stdout.flush()
+
         except Exception as ex:
             self.logger.error("Could not save data to db: %s" % ex)
