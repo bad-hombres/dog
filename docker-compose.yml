@@ -1,0 +1,22 @@
+version: '3'
+services:
+  server:
+    image: "hombres/dog-server"
+    ports:
+      - "5601:5601"
+      - "9200:9200" 
+      - "5044:5044"
+      - "5555:5555" 
+      - "5556:5556"
+  nmap-agent:
+    image: "hombres/dog-nmap-agent"
+    environment:
+      - DOG_SERVER=${DOG_SERVER}
+  nikto-agent:
+    image: "hombres/dog-nikto-agent"
+    environment:
+      - DOG_SERVER=${DOG_SERVER}
+  cve-agent:
+    image: "hombres/dog-cve-search"
+    environment:
+      - DOG_SERVER=${DOG_SERVER}
